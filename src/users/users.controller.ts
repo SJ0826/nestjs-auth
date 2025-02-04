@@ -17,40 +17,33 @@ import { UserInfo } from './interface/user.interface';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) {} // userService 컨트롤러에 주입
 
-  /**
-   * 회원가입
-   */
   @Post()
   async createUser(@Body() createUserDto: CreateUserDto): Promise<void> {
-    console.log(createUserDto);
+    const { name, email, password } = createUserDto;
+    await this.usersService.createUser({ name, email, password });
   }
 
-  /**
-   * 이메일 인증
-   */
   @Post('/email-verify')
-  async verifyEmail(@Query() dto: VerifyEmailDto): Promise<string> {
-    console.log(dto);
-    return 'verify email';
+  async verifyEmail(@Query() dto: VerifyEmailDto) {
+    const { signupVerifyToken } = dto;
+    return await this.usersService.verifyEmail(signupVerifyToken);
   }
 
-  /**
-   * 로그인
-   */
   @Post('/login')
-  async login(@Body() loginDto: UserLoginDto): Promise<string> {
-    console.log(loginDto);
-    return 'login';
+  async login(@Body() loginDto: UserLoginDto) {
+    const { email, password } = loginDto;
+    return await this.usersService.login(email, password);
   }
 
-  /**
-   * 유저 정보 조회
-   */
   @Get('/:id')
   async getUserInfo(@Param('id') userId: string): Promise<UserInfo> {
-    console.log(userId);
-    return { id: '', email: '', name: '' };
+    return await this.usersService.getUserInfo(userId);
+  }
+
+  @Delete('/:id')
+  remove(@Param('id') id: string) {
+    return this.usersService.remove(+id);
   }
 }
