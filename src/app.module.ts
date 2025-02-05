@@ -1,9 +1,22 @@
 import { Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
 import { EmailModule } from './email/email.module';
+import { ConfigModule } from '@nestjs/config';
+import * as process from 'node:process';
+import emailConfig from './config/emailConfig';
+import { validationSchema } from './config/validationSchema';
 
 @Module({
-  imports: [UsersModule, EmailModule],
+  imports: [
+    UsersModule,
+    EmailModule,
+    ConfigModule.forRoot({
+      envFilePath: [`${__dirname}/config/env/.${process.env.NODE_ENV}.env`],
+      load: [emailConfig],
+      isGlobal: true, // 전역모듈로 설정
+      validationSchema, // joi를 이용해 유효성검사
+    }),
+  ],
   controllers: [],
   providers: [],
 })

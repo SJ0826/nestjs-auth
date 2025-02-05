@@ -12,7 +12,7 @@ export class UsersService {
    */
   async createUser(createUserDto: CreateUserDto) {
     const { name, email, password } = createUserDto;
-    // await this.checkUserExists(email); // 유저 중복 검사
+    await this.checkUserExists(email); // 유저 중복 검사
 
     const signupVerifyToken = uuid.v1();
 
