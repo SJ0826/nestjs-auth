@@ -5,7 +5,7 @@ import { EmailService } from '../email/email.service';
 import { UserInfo } from './interface/user.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { ulid } from 'ulid';
 
 @Injectable()
@@ -14,6 +14,7 @@ export class UsersService {
     private emailService: EmailService,
     @InjectRepository(UserEntity)
     private usersRepository: Repository<UserEntity>,
+    private dataSource: DataSource,
   ) {}
   /**
    * 회원가입
@@ -29,7 +30,12 @@ export class UsersService {
 
     const signupVerifyToken = uuid.v1();
 
-    await this.saveUser(name, email, password, signupVerifyToken); // 유저 DB에 저장
+    await this.saveUserUsingTransaction(
+      name,
+      email,
+      password,
+      signupVerifyToken,
+    ); // 유저 DB에 저장
     await this.sendMemberJoinEmail(email, signupVerifyToken); // 회원가입 이메일 발송
   }
 
@@ -81,19 +87,22 @@ export class UsersService {
     return user !== undefined;
   }
 
-  private async saveUser(
+  private async saveUserUsingTransaction(
     name: string,
     email: string,
     password: string,
     signupVerifyToken: string,
   ) {
-    const user = new UserEntity(); // 새로운 유저 엔티티 객체 생성
-    user.id = ulid();
-    user.name = name;
-    user.email = email;
-    user.password = password;
-    user.signupVerifyToken = signupVerifyToken;
-    await this.usersRepository.save(user);
+    await this.dataSource.transaction(async (manager) => {
+      const user = new UserEntity(); // 새로운 유저 엔티티 객체 생성
+      user.id = ulid();
+      user.name = name;
+      user.email = email;
+      user.password = password;
+      user.signupVerifyToken = signupVerifyToken;
+
+      await this.usersRepository.save(user);
+    });
   }
 
   private async sendMemberJoinEmail(email: string, signupVerifyToken: string) {
