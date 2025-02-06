@@ -1,18 +1,31 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import * as uuid from 'uuid';
 import { CreateUserDto } from './dto/create-user.dto';
 import { EmailService } from '../email/email.service';
 import { UserInfo } from './interface/user.interface';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserEntity } from './entities/user.entity';
+import { Repository } from 'typeorm';
+import { ulid } from 'ulid';
 
 @Injectable()
 export class UsersService {
-  constructor(private emailService: EmailService) {}
+  constructor(
+    private emailService: EmailService,
+    @InjectRepository(UserEntity)
+    private usersRepository: Repository<UserEntity>,
+  ) {}
   /**
    * 회원가입
    */
   async createUser(createUserDto: CreateUserDto) {
     const { name, email, password } = createUserDto;
-    await this.checkUserExists(email); // 유저 중복 검사
+    const userExist = await this.checkUserExists(email); // 유저 중복 검사
+    if (userExist) {
+      throw new UnprocessableEntityException(
+        '해당 이메일로는 가입할 수 없습니다.',
+      );
+    }
 
     const signupVerifyToken = uuid.v1();
 
@@ -60,17 +73,27 @@ export class UsersService {
     return `This action removes a #${id} user`;
   }
 
-  private checkUserExists(email: string) {
-    return true;
+  private async checkUserExists(emailAddress: string) {
+    const user = await this.usersRepository.findOne({
+      where: { email: emailAddress },
+    });
+
+    return user !== undefined;
   }
 
-  private saveUser(
+  private async saveUser(
     name: string,
     email: string,
     password: string,
     signupVerifyToken: string,
   ) {
-    return;
+    const user = new UserEntity(); // 새로운 유저 엔티티 객체 생성
+    user.id = ulid();
+    user.name = name;
+    user.email = email;
+    user.password = password;
+    user.signupVerifyToken = signupVerifyToken;
+    await this.usersRepository.save(user);
   }
 
   private async sendMemberJoinEmail(email: string, signupVerifyToken: string) {
