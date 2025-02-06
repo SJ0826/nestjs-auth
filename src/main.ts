@@ -1,21 +1,15 @@
 import { NestFactory } from '@nestjs/core';
-import * as dotenv from 'dotenv';
-import * as path from 'path';
 import { AppModule } from './app.module';
 import * as process from 'node:process';
-
-// dotenv.config({
-//   path: path.resolve(
-//     process.env.NODE_ENV === 'production'
-//       ? '.production.env'
-//       : process.env.NODE_ENV === 'stage'
-//         ? '.stage.env'
-//         : '.development.env',
-//   ),
-// });
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true, // 모든 요청의 데이터에 ValidationPipe 전역으로 적용
+    }),
+  );
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
