@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
+import * as path from 'node:path';
+import * as process from 'node:process';
 import { UsersModule } from './users/users.module';
 import { EmailModule } from './email/email.module';
-import { ConfigModule } from '@nestjs/config';
-import * as process from 'node:process';
 import emailConfig from './config/emailConfig';
 import { validationSchema } from './config/validationSchema';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       entities: [__dirname + '/**/*.entity{.ts,.js}'], // TypeORM이 구동될 때 인식하도록 할 엔티티 클래스 경로
       synchronize: process.env.DATABASE_SYNCHRONIZE === 'true', // dev | 서비스가 실행될 때 DB가 초기화된다.
     }),
+    AuthModule,
   ],
   controllers: [],
   providers: [],
