@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import * as winston from 'winston';
 import * as process from 'node:process';
 import { UsersModule } from './users/users.module';
 import { EmailModule } from './email/email.module';
@@ -9,13 +8,8 @@ import emailConfig from './config/emailConfig';
 import { validationSchema } from './config/validationSchema';
 import { AuthModule } from './auth/auth.module';
 import { LoggerModule } from './logger/logger.module';
-import {
-  WinstonModule,
-  utilities as nestWinstonModuleUtilities,
-} from 'nest-winston';
-import { APP_FILTER } from '@nestjs/core';
-import { HttpExceptionFilter } from './exeption/http-exception.filter';
 import { ExceptionModule } from './exeption/exception.module';
+import { BatchModule } from './batch-module/batch-module.module';
 
 @Module({
   imports: [
@@ -46,6 +40,7 @@ import { ExceptionModule } from './exeption/exception.module';
     AuthModule,
     LoggerModule,
     ExceptionModule,
+    BatchModule,
   ],
   controllers: [],
   providers: [],
