@@ -10,6 +10,8 @@ import { AuthModule } from './auth/auth.module';
 import { LoggerModule } from './logger/logger.module';
 import { ExceptionModule } from './exeption/exception.module';
 import { BatchModule } from './batch-module/batch-module.module';
+import { HealthCheckController } from './health-check/health-check.controller';
+import { HealthCheckModule } from './health-check/health-check.module';
 
 @Module({
   imports: [
@@ -41,6 +43,7 @@ import { BatchModule } from './batch-module/batch-module.module';
     LoggerModule,
     ExceptionModule,
     BatchModule,
+    HealthCheckModule,
   ],
   controllers: [],
   providers: [],
